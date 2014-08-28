@@ -26,6 +26,7 @@ module.exports = (robot) ->
   #
   # Displays the available environments for an application
   robot.respond ///where\s+can\s+i\s+#{DeployPrefix}\s+([-_\.0-9a-z]+)///i, (msg) ->
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     name = msg.match[1]
 
     try
@@ -41,6 +42,7 @@ module.exports = (robot) ->
   #
   # Displays the available environments for an application
   robot.respond DeploysPattern, (msg) ->
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     name        = msg.match[2]
     environment = msg.match[4] || 'production'
 
@@ -58,6 +60,7 @@ module.exports = (robot) ->
   #
   # Actually dispatch deployment requests to GitHub
   robot.respond DeployPattern, (msg) ->
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     task  = msg.match[1].replace(DeployPrefix, "deploy")
     force = msg.match[2] == '!'
     name  = msg.match[3]
@@ -94,4 +97,5 @@ module.exports = (robot) ->
   #
   # Useful for debugging
   robot.respond ///#{DeployPrefix}\:version$///i, (msg) ->
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     msg.send "hubot-deploy v#{Version}/hubot v#{robot.version}/node #{process.version}"

@@ -18,6 +18,7 @@ TokenVerifier  = require(Path.join(__dirname, "..", "token_verifier")).TokenVeri
 ###########################################################################
 module.exports = (robot) ->
   robot.respond ///#{DeployPrefix}-token:set (.*)///i, (msg) ->
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     token = msg.match[1]
 
     verifier = new TokenVerifier(token)
@@ -29,5 +30,6 @@ module.exports = (robot) ->
         msg.reply "Your token is invalid, verify that it has 'repo_deployment' scope."
 
   robot.respond ///#{DeployPrefix}-token:reset///i, (msg) ->
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     delete(msg.envelope.user.githubDeployToken)
     msg.reply "I nuked your deployment token. I'll use my default token until you configure another."
