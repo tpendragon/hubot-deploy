@@ -26,8 +26,8 @@ module.exports = (robot) ->
   #
   # Displays the available environments for an application
   robot.respond ///where\s+can\s+i\s+#{DeployPrefix}\s+([-_\.0-9a-z]+)///i, (msg) ->
-    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     name = msg.match[1]
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer") || robot.auth.hasRole(msg.envelope.user, "#{name}-deployer")
 
     try
       deployment = new Deployment(name)
@@ -42,9 +42,9 @@ module.exports = (robot) ->
   #
   # Displays the available environments for an application
   robot.respond DeploysPattern, (msg) ->
-    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     name        = msg.match[2]
     environment = msg.match[4] || 'production'
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer") || robot.auth.hasRole(msg.envelope.user, "#{name}-deployer")
 
     try
       deployment = new Deployment(name, null, null, environment)
@@ -60,13 +60,13 @@ module.exports = (robot) ->
   #
   # Actually dispatch deployment requests to GitHub
   robot.respond DeployPattern, (msg) ->
-    return unless robot.auth.hasRole(msg.envelope.user, "deployer")
     task  = msg.match[1].replace(DeployPrefix, "deploy")
     force = msg.match[2] == '!'
     name  = msg.match[3]
     ref   = (msg.match[4]||'master')
     env   = (msg.match[5]||'production')
     hosts = (msg.match[6]||'')
+    return unless robot.auth.hasRole(msg.envelope.user, "deployer") || robot.auth.hasRole(msg.envelope.user, "#{name}-deployer")
 
     username = msg.envelope.user.githubLogin or msg.envelope.user.name
 
